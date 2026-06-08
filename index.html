@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>每日一篇</title>
+  <style>
+    :root {
+      --paper: #fbfaf4;
+      --ink: #26312c;
+      --muted: #758079;
+      --line: #ded9c8;
+      --mint: #dce9dd;
+      --sage: #8aa08b;
+      --peach: #f0c9ae;
+      --blue: #b8ccd1;
+      --plum: #9d7f8b;
+      --white: rgba(255, 255, 255, 0.82);
+      --shadow: 0 22px 60px rgba(67, 79, 68, 0.13);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(115deg, rgba(220, 233, 221, 0.72), rgba(251, 250, 244, 0.92) 38%, rgba(240, 201, 174, 0.34)),
+        radial-gradient(circle at 12% 15%, rgba(184, 204, 209, 0.38), transparent 28%),
+        var(--paper);
+      font-family: "Songti SC", "Noto Serif CJK SC", "STSong", serif;
+      letter-spacing: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(38, 49, 44, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38, 49, 44, 0.028) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 78%);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 28px;
+      align-items: end;
+      min-height: 240px;
+      padding: 26px 0 22px;
+    }
+
+    .brand {
+      position: relative;
+      padding-top: 34px;
+    }
+
+    .brand::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 4px;
+      width: 132px;
+      height: 12px;
+      background: repeating-linear-gradient(90deg, var(--sage), var(--sage) 9px, transparent 9px, transparent 18px);
+      opacity: 0.52;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 680px;
+      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
+      font-size: clamp(48px, 8vw, 96px);
+      font-weight: 400;
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .subcopy {
+      width: min(610px, 100%);
+      margin: 20px 0 0;
+      color: #566159;
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .today-strip {
+      border: 1px solid rgba(138, 160, 139, 0.32);
+      border-radius: var(--radius);
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.54);
+      box-shadow: 0 14px 42px rgba(67, 79, 68, 0.09);
+      backdrop-filter: blur(18px);
+    }
+
+    .date-large {
+      display: block;
+      font-size: 48px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date-small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .today-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      min-width: 0;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.1;
+      font-weight: 500;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 370px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .composer,
+    .panel,
+    .article-card {
+      border: 1px solid rgba(117, 128, 121, 0.2);
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .composer {
+      position: sticky;
+      top: 20px;
+      padding: 18px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    h3 {
+      font-size: 19px;
+    }
+
+    .pill {
+      flex: 0 0 auto;
+      border: 1px solid rgba(138, 160, 139, 0.34);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #5d6e61;
+      background: rgba(220, 233, 221, 0.54);
+      font-size: 12px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+      color: #516058;
+      font-size: 13px;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 1px solid rgba(117, 128, 121, 0.26);
+      border-radius: var(--radius);
+      outline: none;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.66);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: rgba(138, 160, 139, 0.74);
+      box-shadow: 0 0 0 4px rgba(138, 160, 139, 0.12);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    textarea {
+      min-height: 178px;
+      resize: vertical;
+      padding: 14px;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    input,
+    select {
+      height: 42px;
+      padding: 0 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 0 14px;
+      color: var(--ink);
+      background: #f3eee2;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(67, 79, 68, 0.12);
+    }
+
+    .btn.primary {
+      flex: 1;
+      color: #fffdf7;
+      background: #586f5d;
+    }
+
+    .btn.icon {
+      width: 42px;
+      padding: 0;
+      font-size: 18px;
+    }
+
+    .hint {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 170px 160px;
+      gap: 10px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(117, 128, 121, 0.18);
+      background: rgba(251, 250, 244, 0.58);
+    }
+
+    .article-list {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .article-card {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(251, 250, 244, 0.78)),
+        var(--white);
+      animation: rise 420ms ease both;
+    }
+
+    .article-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: var(--accent, var(--sage));
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 13px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag {
+      border: 1px solid rgba(117, 128, 121, 0.18);
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .article-title {
+      margin: 0 0 12px;
+      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
+      font-size: 29px;
+      font-weight: 400;
+      line-height: 1.25;
+    }
+
+    .article-body {
+      color: #3f4a43;
+      font-size: 16px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+    }
+
+    .share {
+      margin-top: 16px;
+      border-top: 1px solid rgba(117, 128, 121, 0.18);
+      padding-top: 14px;
+      color: #5b554b;
+      line-height: 1.8;
+      background: linear-gradient(90deg, rgba(240, 201, 174, 0.16), transparent);
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .ghost {
+      min-height: 34px;
+      border: 1px solid rgba(117, 128, 121, 0.18);
+      border-radius: var(--radius);
+      padding: 0 10px;
+      color: #66746b;
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .empty {
+      padding: 52px 22px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .summary-item {
+      border: 1px solid rgba(117, 128, 121, 0.18);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .masthead,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .composer {
+        position: static;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 1180px);
+        padding-top: 16px;
+      }
+
+      .masthead {
+        min-height: 0;
+        gap: 18px;
+      }
+
+      .row,
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .today-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .article-title {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="brand">
+        <h1>每日一篇</h1>
+        <p class="subcopy">把一天里闪过的句子、念头和片段收好。短句会变成可分享的小札，长文会沉淀成一张安静的文章卡。</p>
+      </div>
+      <aside class="today-strip" aria-label="今日概览">
+        <span class="date-large" id="dayNumber">--</span>
+        <span class="date-small" id="dateText">正在取今日日期</span>
+        <div class="today-stats">
+          <div class="stat"><strong id="statToday">0</strong><span>今日</span></div>
+          <div class="stat"><strong id="statWords">0</strong><span>字数</span></div>
+          <div class="stat"><strong id="statDays">0</strong><span>天数</span></div>
+        </div>
+      </aside>
+    </header>
+
+    <section class="workspace">
+      <form class="composer" id="entryForm">
+        <div class="section-title">
+          <h2>今日输入</h2>
+          <span class="pill" id="modePill">文章</span>
+        </div>
+
+        <label for="content">内容</label>
+        <textarea id="content" placeholder="写下一段文字，或只留一句诗。"></textarea>
+
+        <div class="row">
+          <div>
+            <label for="category">分类</label>
+            <select id="category">
+              <option>日记</option>
+              <option>诗句</option>
+              <option>读书</option>
+              <option>灵感</option>
+              <option>工作</option>
+              <option>生活</option>
+            </select>
+          </div>
+          <div>
+            <label for="mood">心境</label>
+            <select id="mood">
+              <option>清醒</option>
+              <option>安静</option>
+              <option>欢喜</option>
+              <option>微澜</option>
+              <option>疲惫</option>
+              <option>笃定</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="title">标题</label>
+        <input id="title" placeholder="留空会自动生成">
+
+        <div class="actions">
+          <button class="btn primary" type="submit">保存今日片段</button>
+          <button class="btn icon" type="button" id="clearDraft" title="清空输入" aria-label="清空输入">×</button>
+        </div>
+        <p class="hint">内容会保存在当前浏览器，不会上传。少于 42 个汉字且不超过 3 行时，会自动按短诗句处理。</p>
+      </form>
+
+      <section>
+        <div class="summary" id="summary"></div>
+        <div class="panel">
+          <div class="toolbar">
+            <input id="search" placeholder="搜索文字、标题、分类">
+            <select id="filterCategory">
+              <option value="全部">全部分类</option>
+            </select>
+            <select id="sort">
+              <option value="new">最新在前</option>
+              <option value="old">最早在前</option>
+            </select>
+          </div>
+          <div class="article-list" id="articleList"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const storeKey = "daily-card-articles-v1";
+    const categories = {
+      "日记": "#8aa08b",
+      "诗句": "#9d7f8b",
+      "读书": "#b08d66",
+      "灵感": "#d09b83",
+      "工作": "#7893a0",
+      "生活": "#91a875"
+    };
+
+    const builtInEntries = [
+      {
+        id: "built-in-2026-06-06-chocolate",
+        title: "巧克力",
+        content: "巧克力是一个人的爱情\n也可以是大众的爱情\n当我们摘掉别人的意义\n便有了自己的意义\n\n谢晓萍 | 巧克力",
+        category: "诗句",
+        mood: "微澜",
+        type: "短诗句",
+        share: "分享这句「巧克力是一个人的爱情，也可以是大众的爱情。当我们摘掉别人的意义，便有了自己的意义」：它把巧克力从礼物、节日和他人的解释里轻轻取回，变成一个人重新命名生活的权利。爱情可以属于众人，也可以只属于此刻的自己。",
+        dateKey: "2026-06-06",
+        dateLabel: "2026年6月6日星期六",
+        createdAt: 1780713600000
+      },
+      {
+        id: "built-in-2026-06-07-baba-yaga",
+        title: "稍停片刻",
+        content: "我们在这里稍停片刻，人生是一片原野，其间有风穿过，故事时而狭窄，时而辽阔。\n\n杜布拉夫卡·乌格雷西奇 | 芭芭雅嘎下了个蛋",
+        category: "读书",
+        mood: "安静",
+        type: "短诗句",
+        share: "分享这句「我们在这里稍停片刻，人生是一片原野，其间有风穿过，故事时而狭窄，时而辽阔」：它像把人从赶路里轻轻拦下，让我们看见故事并不总是直线。狭窄时有风，辽阔时也有风，停一停，才知道自己正站在怎样的原野里。",
+        dateKey: "2026-06-07",
+        dateLabel: "2026年6月7日星期日",
+        createdAt: 1780800000000
+      },
+      {
+        id: "built-in-2026-06-08-brautigan-metaphors",
+        title: "布劳提根的比喻",
+        content: "布劳提根简直是古希腊掌管比喻的神：\n\n■ 夏天，它像石头一样硬。\n\n■ 他的眼睛像一块带伤的地毯，湿漉漉的。\n\n■ 我尽我所能地去安慰他，像是台奇怪的吸尘器。\n\n■ 我像矮小的堂吉诃德，脚下留下一连串的大冒险。\n\n■ 灰色的木台阶像一只老母猫，要上三层楼梯才能到她门前。\n\n■ 我走上通向阁楼的楼梯。我小心翼翼地走着，好像抚摸着一只正在哺乳的老灰猫。\n\n■ 她打开钱包，钱包就像一片秋天的小田野。在一棵老苹果树倒下的树枝旁，她找到了她的钥匙。\n\n■ 我看了眼桌子。一罐速溶咖啡，空杯子和勺子像参加葬礼一样，依次排开。这些是你泡一杯咖啡需要的东西。\n\n■ 像大多数加州人一样，我来自其他地方，为了服务加州而聚集于此，就像一朵吃金属的花收集阳光和雨水，然后向高速公路展示自己的花瓣，再让汽车驶入。\n\n■ 这好像是纯粹的能量，就是那种吃金属的花的影子，把我们从别样的生命中召唤出来，都来塑造加利福尼亚，直到最后都变成像停车计时器形状的泰姬陵。",
+        category: "读书",
+        mood: "欢喜",
+        type: "文章",
+        share: "",
+        dateKey: "2026-06-08",
+        dateLabel: "2026年6月8日星期一",
+        createdAt: 1780886400000
+      }
+    ];
+
+    const form = document.querySelector("#entryForm");
+    const content = document.querySelector("#content");
+    const title = document.querySelector("#title");
+    const category = document.querySelector("#category");
+    const mood = document.querySelector("#mood");
+    const modePill = document.querySelector("#modePill");
+    const list = document.querySelector("#articleList");
+    const summary = document.querySelector("#summary");
+    const search = document.querySelector("#search");
+    const filterCategory = document.querySelector("#filterCategory");
+    const sort = document.querySelector("#sort");
+
+    const today = new Date();
+    const formatter = new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long"
+    });
+
+    document.querySelector("#dayNumber").textContent = String(today.getDate()).padStart(2, "0");
+    document.querySelector("#dateText").textContent = formatter.format(today);
+
+    function loadEntries() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey)) || [];
+        const savedIds = new Set(saved.map((entry) => entry.id));
+        return [
+          ...builtInEntries.filter((entry) => !savedIds.has(entry.id)),
+          ...saved
+        ];
+      } catch {
+        return builtInEntries;
+      }
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem(storeKey, JSON.stringify(entries));
+    }
+
+    function textLength(value) {
+      return value.replace(/\s/g, "").length;
+    }
+
+    function poemCore(value) {
+      return value
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .filter((line) => !/[|｜]/.test(line) && !/^作者[:：]/.test(line))
+        .join("\n");
+    }
+
+    function isShortVerse(value) {
+      const core = poemCore(value);
+      const lines = core.split(/\n+/).filter(Boolean).length || 1;
+      return textLength(core) <= 64 && lines <= 6;
+    }
+
+    function autoTitle(value, type) {
+      const clean = value.replace(/\s+/g, " ").trim();
+      if (type === "短诗句") return clean.slice(0, 14) || "一枚短句";
+      return clean.slice(0, 18) || "未命名的一天";
+    }
+
+    function shareText(value, moodValue) {
+      const clean = poemCore(value).replace(/\s+/g, "");
+      const last = clean.slice(-2) || "此刻";
+      const first = clean.slice(0, 2) || "今日";
+      const moodMap = {
+        "清醒": "像清晨的水面，把心里的次序轻轻照亮。",
+        "安静": "有一种低声的力量，适合慢慢读，也适合慢慢想。",
+        "欢喜": "它不喧哗，却把亮色放进了普通的一刻。",
+        "微澜": "像风经过纸页，留下细小却真实的波纹。",
+        "疲惫": "它替疲惫留了一盏灯，让人可以温柔地停一下。",
+        "笃定": "短短一句，有往前走的骨气，也有回望时的从容。"
+      };
+      return `分享这句「${clean}」：从“${first}”到“${last}”，它把一个瞬间收得很轻。${moodMap[moodValue] || moodMap["安静"]}`;
+    }
+
+    function articleBody(entry) {
+      if (entry.type === "短诗句") return entry.content;
+      return entry.content.trim();
+    }
+
+    function renderSummary(entries) {
+      const todayKey = dateKey(today);
+      const todayEntries = entries.filter((entry) => entry.dateKey === todayKey);
+      const words = todayEntries.reduce((sum, entry) => sum + textLength(entry.content), 0);
+      const days = new Set(entries.map((entry) => entry.dateKey)).size;
+
+      document.querySelector("#statToday").textContent = todayEntries.length;
+      document.querySelector("#statWords").textContent = words;
+      document.querySelector("#statDays").textContent = days;
+
+      const grouped = Object.keys(categories).map((name) => ({
+        name,
+        count: entries.filter((entry) => entry.category === name).length
+      }));
+
+      summary.innerHTML = grouped.slice(0, 4).map((item) => `
+        <div class="summary-item">
+          <span>${item.name}</span>
+          <strong>${item.count}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderFilters() {
+      const current = filterCategory.value || "全部";
+      filterCategory.innerHTML = `<option value="全部">全部分类</option>` + Object.keys(categories).map((name) => (
+        `<option value="${name}">${name}</option>`
+      )).join("");
+      filterCategory.value = current;
+    }
+
+    function render() {
+      const entries = loadEntries();
+      const keyword = search.value.trim().toLowerCase();
+      const filtered = entries
+        .filter((entry) => filterCategory.value === "全部" || entry.category === filterCategory.value)
+        .filter((entry) => {
+          const haystack = `${entry.title} ${entry.content} ${entry.category} ${entry.mood}`.toLowerCase();
+          return !keyword || haystack.includes(keyword);
+        })
+        .sort((a, b) => sort.value === "new" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+
+      renderSummary(entries);
+      renderFilters();
+
+      if (!filtered.length) {
+        list.innerHTML = `<div class="empty">还没有记录。今天先放下一句话，页面会替你把它收成卡片。</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map((entry) => `
+        <article class="article-card" style="--accent: ${categories[entry.category] || categories["日记"]}">
+          <div class="card-meta">
+            <span class="tag">${entry.dateLabel}</span>
+            <span class="tag">${entry.category}</span>
+            <span class="tag">${entry.mood}</span>
+            <span class="tag">${entry.type}</span>
+          </div>
+          <h3 class="article-title">${escapeHtml(entry.title)}</h3>
+          <div class="article-body">${escapeHtml(articleBody(entry))}</div>
+          ${entry.type === "短诗句" ? `<div class="share">${escapeHtml(entry.share)}</div>` : ""}
+          <div class="card-actions">
+            <button class="ghost" type="button" data-action="copy" data-id="${entry.id}">复制</button>
+            <button class="ghost" type="button" data-action="delete" data-id="${entry.id}">删除</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    content.addEventListener("input", () => {
+      modePill.textContent = isShortVerse(content.value) ? "短诗句" : "文章";
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = content.value.trim();
+      if (!value) {
+        content.focus();
+        return;
+      }
+
+      const type = category.value === "诗句" || isShortVerse(value) ? "短诗句" : "文章";
+      const entry = {
+        id: crypto.randomUUID(),
+        title: title.value.trim() || autoTitle(value, type),
+        content: value,
+        category: type === "短诗句" && category.value === "日记" ? "诗句" : category.value,
+        mood: mood.value,
+        type,
+        share: type === "短诗句" ? shareText(value, mood.value) : "",
+        dateKey: dateKey(today),
+        dateLabel: formatter.format(today),
+        createdAt: Date.now()
+      };
+
+      const entries = [entry, ...loadEntries()];
+      saveEntries(entries);
+      form.reset();
+      modePill.textContent = "文章";
+      render();
+    });
+
+    document.querySelector("#clearDraft").addEventListener("click", () => {
+      form.reset();
+      modePill.textContent = "文章";
+      content.focus();
+    });
+
+    list.addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const entries = loadEntries();
+      const entry = entries.find((item) => item.id === button.dataset.id);
+      if (!entry) return;
+
+      if (button.dataset.action === "delete") {
+        saveEntries(entries.filter((item) => item.id !== entry.id));
+        render();
+      }
+
+      if (button.dataset.action === "copy") {
+        const text = `${entry.title}\n${entry.content}${entry.share ? `\n\n${entry.share}` : ""}`;
+        await navigator.clipboard.writeText(text);
+        button.textContent = "已复制";
+        setTimeout(() => {
+          button.textContent = "复制";
+        }, 1200);
+      }
+    });
+
+    [search, filterCategory, sort].forEach((element) => {
+      element.addEventListener("input", render);
+      element.addEventListener("change", render);
+    });
+
+    render();
+  </script>
+</body>
+</html>
