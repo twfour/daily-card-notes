@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "daily_notes.sqlite3"
+HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8001"))
 
 BUILT_IN_ENTRIES = [
@@ -205,7 +206,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     init_db()
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"Serving http://127.0.0.1:{PORT}")
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    print(f"Serving http://{HOST}:{PORT}")
     print(f"Database {DB_PATH}")
     server.serve_forever()

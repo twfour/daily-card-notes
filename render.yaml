@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: daily-card-notes
+    runtime: python
+    plan: free
+    buildCommand: "python3 --version"
+    startCommand: "python3 -B server.py"
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
