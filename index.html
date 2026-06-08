@@ -624,6 +624,11 @@
     const search = document.querySelector("#search");
     const filterCategory = document.querySelector("#filterCategory");
     const sort = document.querySelector("#sort");
+    const apiBase = localStorage.getItem("daily-card-api-base") || (
+      ["localhost", "127.0.0.1"].includes(location.hostname) ? location.origin : ""
+    );
+    let entryCache = [];
+    let apiAvailable = false;
 
     const today = new Date();
     const formatter = new Intl.DateTimeFormat("zh-CN", {
@@ -636,7 +641,7 @@
     document.querySelector("#dayNumber").textContent = String(today.getDate()).padStart(2, "0");
     document.querySelector("#dateText").textContent = formatter.format(today);
 
-    function loadEntries() {
+    function loadLocalEntries() {
       try {
         const saved = JSON.parse(localStorage.getItem(storeKey)) || [];
         const savedIds = new Set(saved.map((entry) => entry.id));
@@ -649,8 +654,71 @@
       }
     }
 
-    function saveEntries(entries) {
+    function saveLocalEntries(entries) {
       localStorage.setItem(storeKey, JSON.stringify(entries));
+    }
+
+    async function requestEntries() {
+      if (!apiBase) return null;
+      try {
+        const response = await fetch(`${apiBase}/api/entries`, {
+          headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) return null;
+        apiAvailable = true;
+        return await response.json();
+      } catch {
+        apiAvailable = false;
+        return null;
+      }
+    }
+
+    async function loadEntries() {
+      const apiEntries = await requestEntries();
+      entryCache = apiEntries || loadLocalEntries();
+      return entryCache;
+    }
+
+    async function createEntry(entry) {
+      if (apiAvailable && apiBase) {
+        try {
+          const response = await fetch(`${apiBase}/api/entries`, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(entry)
+          });
+          if (response.ok) return await response.json();
+        } catch {
+          apiAvailable = false;
+        }
+      }
+
+      const entries = [entry, ...loadLocalEntries()];
+      saveLocalEntries(entries);
+      entryCache = entries;
+      return entry;
+    }
+
+    async function deleteEntry(id) {
+      if (apiAvailable && apiBase) {
+        try {
+          const response = await fetch(`${apiBase}/api/entries/${encodeURIComponent(id)}`, {
+            method: "DELETE",
+            headers: { "Accept": "application/json" }
+          });
+          if (response.ok) return true;
+        } catch {
+          apiAvailable = false;
+        }
+      }
+
+      const entries = loadLocalEntries().filter((entry) => entry.id !== id);
+      saveLocalEntries(entries);
+      entryCache = entries;
+      return true;
     }
 
     function textLength(value) {
@@ -730,7 +798,7 @@
     }
 
     function render() {
-      const entries = loadEntries();
+      const entries = entryCache;
       const keyword = search.value.trim().toLowerCase();
       const filtered = entries
         .filter((entry) => filterCategory.value === "全部" || entry.category === filterCategory.value)
@@ -787,7 +855,7 @@
       modePill.textContent = isShortVerse(content.value) ? "短诗句" : "文章";
     });
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const value = content.value.trim();
       if (!value) {
@@ -809,8 +877,8 @@
         createdAt: Date.now()
       };
 
-      const entries = [entry, ...loadEntries()];
-      saveEntries(entries);
+      await createEntry(entry);
+      await loadEntries();
       form.reset();
       modePill.textContent = "文章";
       render();
@@ -825,12 +893,13 @@
     list.addEventListener("click", async (event) => {
       const button = event.target.closest("button");
       if (!button) return;
-      const entries = loadEntries();
+      const entries = entryCache;
       const entry = entries.find((item) => item.id === button.dataset.id);
       if (!entry) return;
 
       if (button.dataset.action === "delete") {
-        saveEntries(entries.filter((item) => item.id !== entry.id));
+        await deleteEntry(entry.id);
+        await loadEntries();
         render();
       }
 
@@ -849,7 +918,7 @@
       element.addEventListener("change", render);
     });
 
-    render();
+    loadEntries().then(render);
   </script>
 </body>
 </html>

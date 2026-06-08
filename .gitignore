@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+daily_notes.sqlite3
+daily_notes.sqlite3-*
